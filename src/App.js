@@ -9,7 +9,9 @@ function App() {
     script.async = true;
     script.onload = () => {
       if (window.Pi) {
+        // التأكد من تهيئة المكتبة فور تحميل السكريبت
         window.Pi.init({ version: "2.0", sandbox: true });
+        console.log("Pi SDK loaded successfully");
       }
     };
     document.head.appendChild(script);
@@ -17,10 +19,18 @@ function App() {
 
   const login = async () => {
     try {
-      const auth = await window.Pi.authenticate(['username', 'payments'], (p) => {});
+      // فحص إضافي للتأكد من وجود المكتبة قبل تنفيذ الدالة
+      if (!window.Pi) {
+        alert("جاري تحميل مكتبة Pi... يرجى الانتظار ثواني ثم المحاولة مرة أخرى.");
+        return;
+      }
+      const auth = await window.Pi.authenticate(['username', 'payments'], (p) => {
+        console.log("Authentication in progress...", p);
+      });
       setUser(auth.user);
     } catch (e) {
-      alert("Please open this link inside Pi Browser");
+      // رسالة تنبيه واضحة في حال تعذر الدخول
+      alert("خطأ في تسجيل الدخول: تأكد من فتح الرابط داخل Pi Browser حصراً.");
     }
   };
 
@@ -41,8 +51,8 @@ function App() {
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ paymentId: id, txid: tx })
         }),
-        onCancel: () => console.log("Payment Cancelled"),
-        onError: (e) => alert("Payment Error: " + e.message)
+        onCancel: () => console.log("تم إلغاء الدفع"),
+        onError: (e) => alert("خطأ في الدفع: " + e.message)
       });
     } catch (e) {
       alert(e.message);
@@ -54,15 +64,25 @@ function App() {
       <h1 style={{ border: '2px solid #ffc107', padding: '10px 30px', borderRadius: '15px', marginBottom: '30px' }}>
         CHA<span style={{ color: '#ffc107' }}>TOO</span>
       </h1>
+
       {!user ? (
-        <button onClick={login} style={{ padding: '15px 40px', backgroundColor: '#ffc107', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold' }}>
-          Login with Pi
-        </button>
+        <div>
+          <p style={{ marginBottom: '20px' }}>يجب تسجيل الدخول أولاً للمتابعة</p>
+          <button 
+            onClick={login} 
+            style={{ padding: '15px 40px', backgroundColor: '#ffc107', color: 'black', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}
+          >
+            تسجيل الدخول بواسطة Pi
+          </button>
+        </div>
       ) : (
         <div>
-          <p>Welcome, {user.username}</p>
-          <button onClick={handlePay} style={{ padding: '15px 40px', backgroundColor: '#25d366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold' }}>
-            Pay 0.1 Pi
+          <p style={{ fontSize: '18px', marginBottom: '10px' }}>أهلاً بك، <span style={{ color: '#ffc107' }}>{user.username}</span></p>
+          <button 
+            onClick={handlePay} 
+            style={{ padding: '15px 40px', backgroundColor: '#25d366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold', cursor: 'pointer' }}
+          >
+            دفع 0.1 Pi للاستمرار
           </button>
         </div>
       )}
@@ -70,5 +90,6 @@ function App() {
   );
 }
 
+// تصدير واحد فقط لتجنب خطأ Build في Render
 export default App;
 
