@@ -41,12 +41,12 @@ function App() {
         memo: "Chatoo Test Payment",
         metadata: { id: Date.now() }
       }, {
-        onReadyForServerApproval: (id) => fetch('https://chatoo-backend.onrender.com/approve', {
+        onReadyForServerApproval: (id) => fetch('https://chatoo-backend1.onrender.com/approve', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ paymentId: id })
         }),
-        onReadyForServerCompletion: (id, tx) => fetch('https://chatoo-backend.onrender.com/complete', {
+        onReadyForServerCompletion: (id, tx) => fetch('https://chatoo-backend1.onrender.com/complete', {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({ paymentId: id, txid: tx })
